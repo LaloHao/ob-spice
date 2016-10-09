@@ -41,7 +41,7 @@
         (dolist (word wordlist)
           (progn  ;loop through the words
             (if (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word)
-                (progn 
+                (progn
                   ;; if matchs a vector variable format
                   (setq varname (match-string 1 word))
                   (setq varindex (match-string 2 word))
@@ -66,7 +66,7 @@
                                        (lambda (key candidate)
                                          (string= key candidate))))
                   (if (not (eq newword nil))
-                      (progn 
+                      (progn
                         (if (not (stringp newword))
                             (setq newword (number-to-string newword)))
                         (setq word (replace-match (concat newword ".")  nil nil word))
@@ -90,14 +90,14 @@
                   )
               ) ; end of (if (string-match "\\$\\(.*\\)" word)
 
-            
+
             (setq newbody (concat newbody
                                   (if (not (eq firstword 1)) " ")
                                   word))
             (setq firstword 0)
             ) ; end of (progn
           ) ; end of (dolist (word wordlist))
-        
+
         (setq newbody (concat newbody "\n"))
         ) ; end of (progn ;; loop through list of lines ... )
       ) ; end of (dolist (line bodylinelist)  ...function ...)
@@ -105,62 +105,28 @@
 
 ;;;###autoload
 (defun org-babel-execute:spice (body params)
-  "Execute a block of Spice code `BODY' with org-babel and `PARAMS'."
+  "Execute BODY with specified PARAMS."
   (let ((body (org-babel-expand-body:spice body params))
-        (vars (mapcar #'cdr (org-babel-get-header params :var))))
-
-    ;;******************************
-    ;; clean temporary files
+      (vars (mapcar #'cdr (org-babel-get-header params :var)))
+      textfile
+      imagefile
+      raw
+      result)
+    (org-babel-eval "ngspice " body)
     (mapc (lambda (pair)
-            (when (string= (car pair) "file")
-              (setq textfile (concat (cdr pair) ".txt"))
-              (setq imagefile (concat (cdr pair) ".png"))	      
-              )
-            )
-          vars)
-    ;;    (if (file-readable-p textfile)    (delete-file textfile))
-    ;;    (if (file-readable-p imagefile)    (delete-file imagefile))
-    ;;*******************************
-
-    (org-babel-eval "ngspice -b " body)
-
-    ;; loop through all pairs (elements) of the list vars and set text and image file if finds "file" var
-    (mapc (lambda (pair)
-            (when (string= (car pair) "file")
-              (setq textfile (concat (cdr pair) ".txt"))
-              (setq imagefile (concat (cdr pair) ".png"))))
-          vars)
-    ;; produce results        
-    ;; THE FOLLOWING WAS COMMENTED TEMPORARILY
-    ;; (concat
-    ;;  (if (file-readable-p textfile)
-    ;; 	 (get-string-from-file textfile))
-    ;;  (if (file-readable-p imagefile)
-    ;; 	 (concat '"#+ATTR_HTML: :width 600px \n [[file:./" imagefile "]]")
-    ;;    )
-    ;;  )
-
-    ;; ;; Get measurement values from text-file by splitting comma separated values   
-    (if (file-readable-p textfile)
-        (progn	  
-          (setq rawtext (get-string-from-file textfile))
-          ;;(setq rawtext (replace-regexp-in-string "\n" "" rawtext))
-          (setq rawtext (replace-regexp-in-string "\n" "" rawtext))
-          (setq result (split-string rawtext ","))))    
-    (if (file-readable-p imagefile)
-        (progn
-          ;; test if result exist already
-          ;;(if (boundp 'result)
-          (add-to-list 'result (concat '"[[file:./" imagefile "]]") t)    ;; add imagefile to last entry
-          ;;(concat '"[[file:./" imagefile "]]")
-          ;;)  
-          ))
-    result
-    ;; Produce output like     '(test test2)
-    ;;'(test test2)
-    
-    )
-  )
+         (when (string= (car pair) "file")
+           (setq textfile (concat (cdr pair) ""))
+           (setq imagefile (concat (cdr pair) ".png"))))
+       vars)
+    (when (file-readable-p textfile)
+      (progn
+        (setq raw (with-temp-buffer (insert-file-contents textfile) (buffer-string)))
+        ;; (setq raw (replace-regexp-in-string "\n" "" raw))
+        (setq result (split-string raw ",")))
+      )
+    (when (file-readable-p imagefile)
+      (add-to-list 'result (concat '"[[file:./" imagefile "]]") t))
+    result))
 
 (provide 'ob-spice)
 ;;; ob-spice.el ends here
