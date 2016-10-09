@@ -22,9 +22,14 @@
 
 (defun org-babel-expand-body:spice (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-  (let* ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-    (setq newbody "");
-    (setq bodylinelist (split-string body "\n"))
+  (let* ((vars (mapcar #'cdr (org-babel-get-header params :var)))
+      (newbody "")
+      (bodylinelist (split-string body "\n"))
+      wordlist
+      varname
+      varindex
+      newword
+      firstword)
     (dolist (line bodylinelist newbody)
       (progn  ;loop through list of lines
         (setq wordlist (split-string line " "))
@@ -40,8 +45,8 @@
                   (setq newword
                         (nth (string-to-number varindex)
                              (car (assoc-default varname vars
-                                                 (lambda (key candidate)
-                                                   (string= key candidate))))))
+                                               (lambda (key candidate)
+                                                 (string= key candidate))))))
                   (if (not (eq newword nil))
                       (if (not (stringp newword))
                           (setq word (number-to-string newword))
