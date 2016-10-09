@@ -31,17 +31,15 @@
       newword
       firstword)
     (dolist (line bodylinelist newbody)
-      (progn  ;loop through list of lines
+      (progn
         (setq wordlist (split-string line " "))
         (setq firstword 1)
         (dolist (word wordlist)
-          (progn  ;loop through the words
+          (progn
             (if (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word)
                 (progn
-                  ;; if matchs a vector variable format
                   (setq varname (match-string 1 word))
                   (setq varindex (match-string 2 word))
-                  ;; search varname in vars and use the value of varindex to word
                   (setq newword
                         (nth (string-to-number varindex)
                              (car (assoc-default varname vars
@@ -50,12 +48,9 @@
                   (if (not (eq newword nil))
                       (if (not (stringp newword))
                           (setq word (number-to-string newword))
-                        (setq word newword)))
-                  )
-              ) ; end of (if (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word))
-            (if (string-match "\\$\\(.*\\)\\." word) ; if variable has a dot in the end
+                        (setq word newword)))))
+            (if (string-match "\\$\\(.*\\)\\." word)
                 (progn
-                  ;; if matchs a non-vector variable format
                   (setq varname (match-string 1 word))
                   (setq newword
                         (assoc-default varname vars
@@ -65,14 +60,9 @@
                       (progn
                         (if (not (stringp newword))
                             (setq newword (number-to-string newword)))
-                        (setq word (replace-match (concat newword ".")  nil nil word))
-                                        ;(setq word word)
-                        )
-                    ))
-              );; end of (if (string-match "\\$\\(.*\\)\\." word)
+                        (setq word (replace-match (concat newword ".")  nil nil word))))))
             (if (string-match "\\$\\(.*\\)" word)
                 (progn
-                  ;; if matchs a non-vector variable format
                   (setq varname (match-string 1 word))
                   (setq newword
                         (assoc-default varname vars
@@ -81,23 +71,12 @@
                   (if (not (eq newword nil))
                       (if (not (stringp newword))
                           (setq word (number-to-string newword))
-                        (setq word newword)
-                        ))
-                  )
-              ) ; end of (if (string-match "\\$\\(.*\\)" word)
-
-
+                        (setq word newword)))))
             (setq newbody (concat newbody
                                   (if (not (eq firstword 1)) " ")
                                   word))
-            (setq firstword 0)
-            ) ; end of (progn
-          ) ; end of (dolist (word wordlist))
-
-        (setq newbody (concat newbody "\n"))
-        ) ; end of (progn ;; loop through list of lines ... )
-      ) ; end of (dolist (line bodylinelist)  ...function ...)
-    ))
+            (setq firstword 0)))
+        (setq newbody (concat newbody "\n"))))))
 
 ;;;###autoload
 (defun org-babel-execute:spice (body params)
