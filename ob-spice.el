@@ -21,49 +21,47 @@
       newword
       firstword)
     (dolist (line bodylinelist newbody)
-      (progn
-        (setq wordlist (split-string line " "))
-        (setq firstword 1)
-        (dolist (word wordlist)
-          (progn
-            (when (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word)
-              (setq varname (match-string 1 word))
-              (setq varindex (match-string 2 word))
-              (setq newword
-                    (nth (string-to-number varindex)
-                         (car (assoc-default varname vars
-                                           (lambda (key candidate)
-                                             (string= key candidate))))))
-              (if (not (eq newword nil))
-                  (if (not (stringp newword))
-                      (setq word (number-to-string newword))
-                    (setq word newword))))
-            (when (string-match "\\$\\(.*\\)\\." word)
-              (setq varname (match-string 1 word))
-              (setq newword
-                    (assoc-default varname vars
-                                   (lambda (key candidate)
-                                     (string= key candidate))))
-              (if (not (eq newword nil))
-                  (progn
-                    (if (not (stringp newword))
-                        (setq newword (number-to-string newword)))
-                    (setq word (replace-match (concat newword ".")  nil nil word)))))
-            (when (string-match "\\$\\(.*\\)" word)
-              (setq varname (match-string 1 word))
-              (setq newword
-                    (assoc-default varname vars
-                                   (lambda (key candidate)
-                                     (string= key candidate))))
-              (if (not (eq newword nil))
-                  (if (not (stringp newword))
-                      (setq word (number-to-string newword))
-                    (setq word newword))))
-            (setq newbody (concat newbody
-                                  (if (not (eq firstword 1)) " ")
-                                  word))
-            (setq firstword 0)))
-        (setq newbody (concat newbody "\n"))))))
+      (setq wordlist (split-string line " "))
+      (setq firstword 1)
+      (dolist (word wordlist)
+        (when (string-match "\\$\\(.*\\)\\[\\(.*\\)\\]" word)
+          (setq varname (match-string 1 word))
+          (setq varindex (match-string 2 word))
+          (setq newword
+                (nth (string-to-number varindex)
+                     (car (assoc-default varname vars
+                                       (lambda (key candidate)
+                                         (string= key candidate))))))
+          (if (not (eq newword nil))
+              (if (not (stringp newword))
+                  (setq word (number-to-string newword))
+                (setq word newword))))
+        (when (string-match "\\$\\(.*\\)\\." word)
+          (setq varname (match-string 1 word))
+          (setq newword
+                (assoc-default varname vars
+                               (lambda (key candidate)
+                                 (string= key candidate))))
+          (if (not (eq newword nil))
+              (progn
+                (if (not (stringp newword))
+                    (setq newword (number-to-string newword)))
+                (setq word (replace-match (concat newword ".")  nil nil word)))))
+        (when (string-match "\\$\\(.*\\)" word)
+          (setq varname (match-string 1 word))
+          (setq newword
+                (assoc-default varname vars
+                               (lambda (key candidate)
+                                 (string= key candidate))))
+          (if (not (eq newword nil))
+              (if (not (stringp newword))
+                  (setq word (number-to-string newword))
+                (setq word newword))))
+        (setq newbody (concat newbody
+                              (if (not (eq firstword 1)) " ")
+                              word))
+        (setq firstword 0))
+      (setq newbody (concat newbody "\n")))))
 
 ;;;###autoload
 (defun org-babel-execute:spice (body params)
