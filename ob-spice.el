@@ -20,15 +20,6 @@
 
 (add-to-list 'org-babel-tangle-lang-exts '("spice" . "cir"))
 
-(defun ob-spice-concat (wordlist)
-  "Concatenate elements of a `WORDLIST' into a string separated by spaces."
-  ;; example of usage
-  ;; (ob-spice-concat '("This" "is" "a" "long" "journey"))
-  (setq newtext (car wordlist)) ; first word is without space before
-  (setq wordlist (rest wordlist)) ; exclude the first word from the list
-  (dolist (word wordlist newtext) ; loop through the list and concatenate the values
-    (setq newtext (concat newtext " " word))))
-
 (defun org-babel-expand-body:spice (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let* ((vars (mapcar #'cdr (org-babel-get-header params :var))))
